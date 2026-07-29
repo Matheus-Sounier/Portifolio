@@ -1,0 +1,204 @@
+---
+title: "Face Access Control System Docs"
+date: 2026-07-05
+---
+
+A real-time facial recognition access control system built with **[Python](https://docs.python.org/3/)**, **[MediaPipe](https://ai.google.dev/edge/mediapipe)**, **[InsightFace](https://github.com/deepinsight/insightface)**, **[FastAPI](https://fastapi.tiangolo.com/)**, and **[Streamlit](https://docs.streamlit.io/)**. Facial data is stored in **[Oracle Database](https://www.oracle.com/database/)** running in **[Docker](https://docs.docker.com/)**.
+
+The project also features an AI-powered analytics chat using **[OpenRouter](https://openrouter.ai/docs/)** for natural-language SQL queries and automatic descriptions of unrecognized faces.
+
+---
+
+## Demonstration
+
+https://github.com/user-attachments/assets/0e1a2068-f921-43a8-826a-254eb32a3944
+
+https://github.com/user-attachments/assets/79f4f735-4178-42d3-b0e6-c23cb5a04508
+
+### Registered Face
+
+<img width="453" height="392" alt="Registered Face" src="https://github.com/user-attachments/assets/408678fe-7983-4dbb-bb78-aa1a1dfc44dd" />
+
+### Unregistered Face
+
+<img width="385" height="368" alt="Unregistered Face" src="https://github.com/user-attachments/assets/1ef84bc9-351b-4ac2-bca8-04954fead0c9" />
+
+---
+
+## Technologies
+
+- [Python](https://docs.python.org/3/)
+- [OpenCV](https://docs.opencv.org/4.x/)
+- [MediaPipe](https://ai.google.dev/edge/mediapipe)
+- [InsightFace](https://github.com/deepinsight/insightface)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Streamlit](https://docs.streamlit.io/)
+- [Oracle Database](https://www.oracle.com/database/)
+- [Docker](https://docs.docker.com/)
+- [OpenRouter](https://openrouter.ai/docs/)
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone git@github.com:Matheus-Sounier/Face-Access-Control-System.git
+cd Face-Access-Control-System
+```
+
+Copy the environment file:
+
+```bash
+cp .env.example .env
+```
+
+---
+
+### Oracle Database
+
+Access the container:
+
+```bash
+docker exec -it -u oracle oracle_face_detection sqlplus / as sysdba
+```
+
+Switch to the pluggable database:
+
+```sql
+ALTER SESSION SET CONTAINER = FREEPDB1;
+```
+
+Create the application user:
+
+```sql
+CREATE USER your_app_user IDENTIFIED BY your_password;
+GRANT CONNECT, RESOURCE TO your_app_user;
+GRANT UNLIMITED TABLESPACE TO your_app_user;
+```
+
+For the AI analytics endpoint, create a read-only user:
+
+```sql
+GRANT CREATE SESSION TO <analytics_user>;
+
+GRANT SELECT ON your_app_user.DETECTED_PEOPLE TO <analytics_user>;
+GRANT SELECT ON your_app_user.ACCESS_LOGS TO <analytics_user>;
+
+CREATE SYNONYM <analytics_user>.DETECTED_PEOPLE FOR your_app_user.DETECTED_PEOPLE;
+CREATE SYNONYM <analytics_user>.ACCESS_LOGS FOR your_app_user.ACCESS_LOGS;
+```
+
+This account should only have read permissions.
+
+---
+
+### Face Detection Model
+
+Download the local **[MediaPipe](https://ai.google.dev/edge/mediapipe)** model:
+
+```bash
+mkdir -p models
+
+curl -o models/blaze_face_full_range.tflite \
+https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/1/blaze_face_full_range.tflite
+```
+
+---
+
+### Start the Services
+
+```bash
+docker compose up -d --build
+```
+
+Services:
+
+- FastAPI (8000)
+- Streamlit (8501)
+- Oracle Database
+
+---
+
+### Desktop Application
+
+```bash
+python -m venv .venv
+```
+
+Activate the environment, install the dependencies and run:
+
+```bash
+pip install -r requirements-desktop.txt
+python main.py
+```
+
+---
+
+## Usage
+
+### Enroll
+
+```bash
+curl -X POST http://localhost:8000/enroll \
+  -F "name=elon" \
+  -F "employee_id=0099" \
+  -F "access_level=Employee" \
+  -F "photo_1=@photo1.png"
+```
+
+Additional photos are optional but improve recognition accuracy.
+
+---
+
+### Recognize
+
+```bash
+curl -X POST http://localhost:8000/recognize \
+  -F "file=@photo.png"
+```
+
+---
+
+## Common Issues
+
+### Oracle Connection
+
+```text
+ORA-12514
+ORA-12154
+ORA-01109
+```
+
+Verify the database host, port, service name, credentials, and ensure the Oracle container has finished starting.
+
+---
+
+### API Startup Error
+
+```bash
+docker compose logs -f fastapi_app
+```
+
+---
+
+### Camera Not Detected
+
+Ensure no other application is using the webcam.
+
+---
+
+### Missing Face Detection Model
+
+```text
+FileNotFoundError
+```
+
+Verify that:
+
+```text
+models/blaze_face_full_range.tflite
+```
+
+exists.

@@ -1,0 +1,210 @@
+---
+title: "Real Time Motion Docs"
+date: 2026-01-20
+---
+
+A real-time motion-controlled system built with **C++**, **OpenCV**, and **CMake**.
+
+This project allows players to control keyboard inputs using body movement detected through a webcam. Instead of relying on traditional peripherals, the system detects motion inside configurable regions and automatically presses the assigned keys.
+
+---
+
+## Features
+
+- Real-time motion detection using a webcam
+- Customizable motion detection areas (ROIs)
+- Keyboard binding for each detection area
+- Persistent square configuration
+- Optional jump detection system
+- Jump power measurement based on airtime
+- Motion-based directional controls
+- Built with OpenCV and modern C++
+
+---
+
+## Technologies
+
+This project is built using the following tools and libraries:
+
+| Technology | Documentation |
+|------------|---------------|
+| C++ | [cppreference](https://en.cppreference.com/w/) |
+| CMake | [CMake Documentation](https://cmake.org/documentation/) |
+| OpenCV | [OpenCV Documentation](https://docs.opencv.org/4.x/) |
+| Visual Studio | [Visual Studio C++ Documentation](https://learn.microsoft.com/cpp/) |
+| Win32 API (Keyboard Input) | [Win32 User Input Documentation](https://learn.microsoft.com/windows/win32/api/winuser/) |
+| STL (C++ Standard Library) | [STL Reference](https://en.cppreference.com/w/cpp) |
+
+---
+
+## How It Works
+
+The system continuously captures frames from a webcam using **OpenCV**.
+
+Each frame is compared with the previous one to detect movement inside predefined **Regions of Interest (ROIs)**.
+
+When motion exceeds a configurable threshold inside an ROI, the corresponding keyboard key is automatically triggered.
+
+---
+
+### Detection Squares
+
+Detection squares (ROIs) can be placed anywhere on the camera feed.
+
+Each square acts as an independent motion sensor.
+
+Whenever movement is detected inside a square, the assigned keyboard key is pressed automatically.
+
+```text
+Motion Detected
+      ↓
+ROI Activated
+      ↓
+Keyboard Key Pressed
+```
+
+This allows players to create custom control layouts for different games.
+
+---
+
+### Jump Detection
+
+When enabled, a horizontal line appears on the screen.
+
+The system monitors movement above this line.
+
+If the player crosses the line, the jump detection algorithm starts measuring the airtime.
+
+The duration of the jump can then be used to determine jump strength or trigger different in-game actions.
+
+```text
+Player Crosses Line
+        ↓
+Jump Starts
+        ↓
+Airtime Measured
+        ↓
+Jump Ends
+```
+
+---
+
+## Detection Method
+
+The project uses **frame differencing**, a common computer vision technique for motion detection.
+
+The process consists of:
+
+1. Capturing consecutive webcam frames.
+2. Converting frames to grayscale.
+3. Computing the absolute difference between frames.
+4. Applying a threshold to isolate moving pixels.
+5. Measuring the amount of motion inside each ROI.
+6. Triggering keyboard events when the configured threshold is exceeded.
+
+This approach is lightweight, fast, and suitable for real-time applications.
+
+---
+
+## Requirements
+
+Before building the project, install:
+
+### 1. Visual Studio
+
+Install **Visual Studio** with the **Desktop Development with C++** workload.
+
+See the [Visual Studio C++ documentation](https://learn.microsoft.com/cpp/).
+
+---
+
+### 2. CMake
+
+Download CMake from the [official CMake website](https://cmake.org/download/).
+
+Documentation is available in the [CMake Documentation](https://cmake.org/documentation/).
+
+Make sure CMake is available in your system `PATH`.
+
+---
+
+### 3. OpenCV
+
+Download OpenCV from the [official OpenCV releases page](https://opencv.org/releases/).
+
+For usage and API references, see the [OpenCV Documentation](https://docs.opencv.org/4.x/).
+
+Add OpenCV to your Windows `PATH` and configure it correctly for your build environment.
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone git@github.com:Matheus-Sounier/Real-Time-Motion.git
+```
+
+Enter the project directory:
+
+```bash
+cd Real-Time-Motion
+```
+
+Create a build directory:
+
+```bash
+mkdir build
+```
+
+Generate build files:
+
+```bash
+cmake -B build/
+```
+
+Build the project:
+
+```bash
+cmake --build build/
+```
+
+---
+
+## Running
+
+After building, the executable will be generated inside the build folder.
+
+Example:
+
+```text
+D:\Projects\YourProjectDirectory\build\Debug\JumpKingIRL.exe
+```
+
+Run the executable from the terminal.
+
+---
+
+## Initial Configuration
+
+When the program starts, the following instructions will be displayed:
+
+```text
+USAGE:
+
+HOW TO CREATE A SQUARE:
+- Double-click with the left mouse button to add a detection square at the clicked location.
+
+HOW TO BIND A KEY:
+- Click on a square to select it.
+- Press a key to bind it to the selected square.
+
+HOW TO MOVE A SQUARE:
+- Click on a square to select it.
+- Use the arrow keys to move the square within the window.
+
+HOW TO REMOVE A SQUARE:
+- Click on a square to select it.
+- Right-click on the selected square to remove it.
+```
