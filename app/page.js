@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getLatestArticles, daysSinceLastPost } from '@/lib/articles'
-import { getAllWork } from '@/lib/work'
+import { getAllWork } from '@/lib/works'
 import { getAllProjects } from '@/lib/projects'
 import { ArticleCard } from '@/app/components/ArticleCard'
 import { ProjectCard } from '@/app/components/ProjectCard'
@@ -28,18 +28,18 @@ export default function Home() {
           <p className="text-sm text-zinc-500 mt-2">backend developer · Manaus, Brasil</p>
           <p className="text-sm leading-relaxed mt-4 text-zinc-400">
             I'm an 18-year-old Software Engineering student passionate about
-            industrial software, Computer Vision, and LLM-powered applications backend. 
+            industrial software, Computer Vision, and LLM-powered applications backend.
             I enjoy building scalable systems that solve real-world problems, from ERP integrations to real-time vision pipelines.
           </p>
         </div>
         <div className="flex-1 flex flex-col items-center">
           <img
-          src="/avatar.png"
-          alt="Matheus dos Santos Sounier"
-          width={150}
-          height={150}
-          className="rounded-full object-cover shrink-0"
-        />
+            src="/avatar.png"
+            alt="Matheus dos Santos Sounier"
+            width={150}
+            height={150}
+            className="rounded-full object-cover shrink-0"
+          />
 
           <div className="mt-16 flex flex-row items-center justify-center sm:justify-start gap-3">
             <a
@@ -153,11 +153,11 @@ export default function Home() {
           <div key={w.slug} className="py-3">
             <div key={w.slug} className="py-3">
               <Link
-                href={`/work/${w.slug}`}
+                href={`/works/${w.slug}`}
                 className="font-semibold hover:text-red-400 transition-colors duration-150"
               >
-                  {w.company}
-                
+                {w.company}
+
                 <p className="text-xs text-zinc-500">
                   {w.role} · {formatPeriod(w.startDate, w.endDate)}
                 </p>
@@ -165,7 +165,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          
+
         ))}
       </Section>
 

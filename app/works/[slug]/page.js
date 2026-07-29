@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getWorkBySlug, getAllWork } from '@/lib/work'
+import { getWorkBySlug, getAllWork } from '@/lib/works'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
 import rehypePrettyCode from 'rehype-pretty-code'

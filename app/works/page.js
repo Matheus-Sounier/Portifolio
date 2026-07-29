@@ -1,4 +1,4 @@
-import { getAllWork } from '@/lib/work'
+import { getAllWork } from '@/lib/works'
 import { WorkCard } from '@/app/components/WorkCard'
 
 export default function WorkPage() {
