@@ -7,7 +7,7 @@ export default function NotFound() {
   const pathname = usePathname()
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-24 font-mono text-sm text-zinc-300">
+    <main className="max-w-2xl mx-auto px-6 py-8 font-mono text-sm text-zinc-300">
 
       <p className="text-zinc-500">
         matheus@portfolio:~$

@@ -20,7 +20,7 @@ export default async function ArticlePage({ params }) {
   const { frontmatter, content } = getArticleBySlug(slug)
 
   return (
-    <main className="max-w-2xl mx-auto py-24 px-6 font-mono">
+    <main className="max-w-2xl mx-auto py-8 px-6 font-mono">
       <Link href="/articles" className="text-xs text-red-400 hover:underline">
         ← all articles
       </Link>

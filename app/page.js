@@ -19,17 +19,18 @@ export default function Home() {
   const daysSince = daysSinceLastPost()
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16 font-mono text-zinc-300">
+    <main className="max-w-2xl mx-auto px-6 py-8 font-mono text-zinc-300">
 
-      <div className="flex items-start gap-12">
+      <div className="flex gap-12">
 
         <div>
           <h1 className="text-4xl font-bold text-zinc-100">Matheus Sounier</h1>
           <p className="text-sm text-zinc-500 mt-2">backend developer · Manaus, Brasil</p>
           <p className="text-sm leading-relaxed mt-4 text-zinc-400">
-            I'm an 18-year-old Software Engineering student passionate about
-            industrial software, Computer Vision, and LLM-powered applications backend.
-            I enjoy building scalable systems that solve real-world problems, from ERP integrations to real-time vision pipelines.
+            I'm an 18-year-old Software Engineering student passionate about Industry 4.0 technologies,
+            including industrial software, IoT, Computer Vision, and LLM-powered systems. 
+            I enjoy designing solutions that integrate ERPs, connected devices, 
+            real-time vision to solve real industrial challenges.
           </p>
         </div>
         <div className="flex-1 flex flex-col items-center">
@@ -41,7 +42,7 @@ export default function Home() {
             className="rounded-full object-cover shrink-0"
           />
 
-          <div className="mt-16 flex flex-row items-center justify-center sm:justify-start gap-3">
+          <div className="mt-auto flex flex-row items-center justify-center sm:justify-start gap-3">
             <a
               href="https://github.com/Matheus-Sounier"
               target="_blank"
