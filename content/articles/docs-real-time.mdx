@@ -5,26 +5,23 @@ date: 2026-01-20
 
 A real-time motion-controlled system built with **C++**, **OpenCV**, and **CMake**.
 
-This project allows players to control keyboard inputs using body movement detected through a webcam. Instead of relying on traditional peripherals, the system detects motion inside configurable regions and automatically presses the assigned keys.
+The project allows players to control keyboard inputs using body movement detected through a webcam. Motion inside configurable regions automatically triggers the assigned keyboard keys.
 
 ---
 
 ## Features
 
 - Real-time motion detection using a webcam
-- Customizable motion detection areas (ROIs)
-- Keyboard binding for each detection area
+- Configurable motion detection areas (ROIs)
+- Custom keyboard bindings
 - Persistent square configuration
-- Optional jump detection system
+- Optional jump detection
 - Jump power measurement based on airtime
 - Motion-based directional controls
-- Built with OpenCV and modern C++
 
 ---
 
 ## Technologies
-
-This project is built using the following tools and libraries:
 
 | Technology | Documentation |
 |------------|---------------|
@@ -32,28 +29,21 @@ This project is built using the following tools and libraries:
 | CMake | [CMake Documentation](https://cmake.org/documentation/) |
 | OpenCV | [OpenCV Documentation](https://docs.opencv.org/4.x/) |
 | Visual Studio | [Visual Studio C++ Documentation](https://learn.microsoft.com/cpp/) |
-| Win32 API (Keyboard Input) | [Win32 User Input Documentation](https://learn.microsoft.com/windows/win32/api/winuser/) |
-| STL (C++ Standard Library) | [STL Reference](https://en.cppreference.com/w/cpp) |
+| Win32 API | [User Input Documentation](https://learn.microsoft.com/windows/win32/api/winuser/) |
 
 ---
 
 ## How It Works
 
-The system continuously captures frames from a webcam using **OpenCV**.
+The application captures webcam frames with **OpenCV** and compares consecutive frames to detect movement inside predefined **Regions of Interest (ROIs)**.
 
-Each frame is compared with the previous one to detect movement inside predefined **Regions of Interest (ROIs)**.
-
-When motion exceeds a configurable threshold inside an ROI, the corresponding keyboard key is automatically triggered.
+When movement exceeds a configurable threshold, the corresponding keyboard input is automatically triggered.
 
 ---
 
 ### Detection Squares
 
-Detection squares (ROIs) can be placed anywhere on the camera feed.
-
-Each square acts as an independent motion sensor.
-
-Whenever movement is detected inside a square, the assigned keyboard key is pressed automatically.
+Each ROI acts as an independent motion sensor that can be positioned anywhere on the camera feed.
 
 ```text
 Motion Detected
@@ -63,19 +53,11 @@ ROI Activated
 Keyboard Key Pressed
 ```
 
-This allows players to create custom control layouts for different games.
-
 ---
 
 ### Jump Detection
 
-When enabled, a horizontal line appears on the screen.
-
-The system monitors movement above this line.
-
-If the player crosses the line, the jump detection algorithm starts measuring the airtime.
-
-The duration of the jump can then be used to determine jump strength or trigger different in-game actions.
+When enabled, the system monitors movement above a configurable horizontal line. Crossing the line starts airtime measurement, which can be used to determine jump strength or trigger different in-game actions.
 
 ```text
 Player Crosses Line
@@ -91,90 +73,46 @@ Jump Ends
 
 ## Detection Method
 
-The project uses **frame differencing**, a common computer vision technique for motion detection.
+Motion detection is based on **frame differencing**:
 
-The process consists of:
+1. Capture consecutive frames.
+2. Convert to grayscale.
+3. Compute the absolute difference.
+4. Apply a threshold.
+5. Measure motion inside each ROI.
+6. Trigger keyboard events when the threshold is exceeded.
 
-1. Capturing consecutive webcam frames.
-2. Converting frames to grayscale.
-3. Computing the absolute difference between frames.
-4. Applying a threshold to isolate moving pixels.
-5. Measuring the amount of motion inside each ROI.
-6. Triggering keyboard events when the configured threshold is exceeded.
-
-This approach is lightweight, fast, and suitable for real-time applications.
+This lightweight approach is well suited for real-time applications.
 
 ---
 
 ## Requirements
 
-Before building the project, install:
+Install:
 
-### 1. Visual Studio
+- **Visual Studio** (Desktop Development with C++)
+- **CMake**
+- **OpenCV**
 
-Install **Visual Studio** with the **Desktop Development with C++** workload.
-
-See the [Visual Studio C++ documentation](https://learn.microsoft.com/cpp/).
-
----
-
-### 2. CMake
-
-Download CMake from the [official CMake website](https://cmake.org/download/).
-
-Documentation is available in the [CMake Documentation](https://cmake.org/documentation/).
-
-Make sure CMake is available in your system `PATH`.
-
----
-
-### 3. OpenCV
-
-Download OpenCV from the [official OpenCV releases page](https://opencv.org/releases/).
-
-For usage and API references, see the [OpenCV Documentation](https://docs.opencv.org/4.x/).
-
-Add OpenCV to your Windows `PATH` and configure it correctly for your build environment.
+Ensure both **CMake** and **OpenCV** are correctly configured in your system environment.
 
 ---
 
 ## Installation
 
-Clone the repository:
-
 ```bash
 git clone git@github.com:Matheus-Sounier/Real-Time-Motion.git
-```
-
-Enter the project directory:
-
-```bash
 cd Real-Time-Motion
-```
 
-Create a build directory:
-
-```bash
-mkdir build
-```
-
-Generate build files:
-
-```bash
-cmake -B build/
-```
-
-Build the project:
-
-```bash
-cmake --build build/
+cmake -B build
+cmake --build build
 ```
 
 ---
 
 ## Running
 
-After building, the executable will be generated inside the build folder.
+After building, the executable will be generated inside the `build` directory.
 
 Example:
 
@@ -182,29 +120,20 @@ Example:
 D:\Projects\YourProjectDirectory\build\Debug\JumpKingIRL.exe
 ```
 
-Run the executable from the terminal.
-
 ---
 
 ## Initial Configuration
 
-When the program starts, the following instructions will be displayed:
-
 ```text
-USAGE:
+CREATE A SQUARE
+- Double-click with the left mouse button.
 
-HOW TO CREATE A SQUARE:
-- Double-click with the left mouse button to add a detection square at the clicked location.
+BIND A KEY
+- Select a square and press any key.
 
-HOW TO BIND A KEY:
-- Click on a square to select it.
-- Press a key to bind it to the selected square.
+MOVE A SQUARE
+- Select a square and use the arrow keys.
 
-HOW TO MOVE A SQUARE:
-- Click on a square to select it.
-- Use the arrow keys to move the square within the window.
-
-HOW TO REMOVE A SQUARE:
-- Click on a square to select it.
-- Right-click on the selected square to remove it.
+REMOVE A SQUARE
+- Select a square and right-click.
 ```

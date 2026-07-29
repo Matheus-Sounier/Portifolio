@@ -3,9 +3,16 @@ title: "Kraken Docs"
 date: 2025-12-15
 ---
 
-Kraken is a line follower robot project built with **[Arduino](https://docs.arduino.cc/)** and **[PlatformIO](https://docs.platformio.org/)** using a modular firmware architecture. Infrared sensors detect the line position while a PID controller continuously adjusts the motor speeds to keep the robot centered on the track.
+## Overview
 
-The firmware is organized into independent modules for sensors, PID control, motor control, and the main application, making the project easier to maintain and extend.
+Kraken is a modular line follower robot built with [PlatformIO](https://platformio.org/). It uses an infrared sensor array to detect the line position and a PID controller to continuously adjust motor speeds, keeping the robot centered while predicting the correct direction at line intersections.
+
+The firmware is divided into four independent modules:
+
+- Sensors
+- PID Controller
+- Motor Control
+- Main Application
 
 ---
 
@@ -14,10 +21,10 @@ The firmware is organized into independent modules for sensors, PID control, mot
 ### Components
 
 - [Arduino Uno R3](https://docs.arduino.cc/hardware/uno-rev3/)
-- L298N Dual H-Bridge Driver
+- [L298N Dual H-Bridge Driver](https://lastminuteengineers.com/l298n-dc-stepper-driver-arduino-tutorial/)
 - 2× 6V DC Motors
-- 2× Wheels
 - Infrared Sensor Array
+- 2× Wheels
 - 9V Power Supply
 
 ---
@@ -27,7 +34,7 @@ The firmware is organized into independent modules for sensors, PID control, mot
 ### Sensors
 
 | Sensor | Pin |
-|---------|-----|
+| :----: | :-: |
 | S1 | A0 |
 | S2 | A1 |
 | S3 | A2 |
@@ -37,7 +44,7 @@ The firmware is organized into independent modules for sensors, PID control, mot
 ### Motor Driver (L298N)
 
 | Function | Pin |
-|----------|-----|
+| :------: | :-: |
 | ENA | 5 |
 | ENB | 6 |
 | IN1 | 8 |
@@ -47,7 +54,7 @@ The firmware is organized into independent modules for sensors, PID control, mot
 
 ---
 
-## Modules
+## Architecture
 
 ### Sensors
 
@@ -56,16 +63,14 @@ Responsible for:
 - Reading the infrared sensors
 - Calculating the line position error
 - Detecting line loss
-- Providing input for the PID controller
-
----
+- Providing input to the PID controller
 
 ### PID Controller
 
 Responsible for:
 
-- Proportional (P), Integral (I), and Derivative (D) control
-- Computing correction values
+- Computing the proportional, integral, and derivative terms
+- Generating correction values
 - Adjusting left and right motor speeds
 
 Default parameters:
@@ -78,58 +83,43 @@ Kd = 9.0;
 baseSpeed = 130;
 ```
 
----
-
 ### Motor Control
 
 Responsible for:
 
 - Motor direction control
 - PWM speed control
-- Stop routines
 - Differential steering
+- Stop routines
 
 ---
 
 ## PID Logic
 
-The controller continuously computes the PID output:
-
 ```text
-integral      = integral + error;
-derivative    = error - previousError;
-pid           = (Kp * error) + (Ki * integral) + (Kd * derivative);
-previousError = error;
+integral      = integral + error
+derivative    = error - previousError
+pid           = (Kp * error) + (Ki * integral) + (Kd * derivative)
+previousError = error
 ```
 
-Motor speeds are adjusted dynamically:
+Motor output:
 
 ```text
-leftSpeed  = dynamicBase + pid;
-rightSpeed = dynamicBase - pid;
+leftSpeed  = dynamicBase + pid
+rightSpeed = dynamicBase - pid
 ```
 
-This enables smooth steering corrections while following the line.
+This feedback loop enables smooth, real-time line tracking.
 
 ---
 
-## Requirements
+## Technologies
 
-### 1. [Visual Studio Code](https://code.visualstudio.com/)
-
-Install **Visual Studio Code** with the **[PlatformIO](https://platformio.org/)** extension.
-
----
-
-### 2. [PlatformIO](https://docs.platformio.org/)
-
-The project uses PlatformIO to build and upload the firmware.
-
----
-
-### 3. Arduino Uno Drivers
-
-Install the appropriate drivers if your board is not automatically recognized.
+- [C++](https://en.cppreference.com/w/)
+- [PlatformIO](https://platformio.org/)
+- [Arduino Framework](https://docs.arduino.cc/)
+- [Visual Studio Code](https://code.visualstudio.com/)
 
 ---
 
@@ -147,13 +137,7 @@ Enter the project directory:
 cd Kraken_arduino
 ```
 
-Open the project in **[Visual Studio Code](https://code.visualstudio.com/)**.
-
-**[PlatformIO](https://docs.platformio.org/)** will automatically download:
-
-- AVR toolchain
-- Arduino framework
-- Required packages
+Open the project in **Visual Studio Code**. PlatformIO will automatically install the required toolchain and dependencies.
 
 ---
 
@@ -165,13 +149,13 @@ Compile the firmware:
 pio run
 ```
 
-Or use **PlatformIO → Build** inside Visual Studio Code.
+or use **PlatformIO → Build**.
 
 ---
 
 ## Upload
 
-Connect the **[Arduino Uno R3](https://docs.arduino.cc/hardware/uno-rev3/)** and upload the firmware:
+Connect the Arduino Uno and upload the firmware:
 
 ```bash
 pio run --target upload

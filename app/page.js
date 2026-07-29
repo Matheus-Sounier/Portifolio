@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <main className="w-full max-w-3xl mx-auto px-6 py-8 font-mono text-zinc-700 dark:text-zinc-300">
 
-      <div className="flex flex-col-reverse sm:flex-row gap-8 sm:gap-12">
+      <div className="flex gap-12">
 
         <div>
           <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">Matheus Sounier</h1>

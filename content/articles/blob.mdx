@@ -1,6 +1,162 @@
 ---
-title: "How to use blob and storage in the database?"
-date: 2026-07-26
+title: "How to Use BLOB Storage in a Database"
+date: 2026-06-26
 ---
 
-I will talk about how blob and storage work in the database, and how to use it in your project.
+When working with images, the most common solution is storing them as files on disk. Another approach is storing them directly inside the database using a **BLOB**.
+
+In this article I'll explain what a BLOB is, why you might want to use it, and walk through the same pipeline I use in my [Face Access Control System](https://github.com/Matheus-Sounier/Face-Access-Control-System) project.
+
+---
+
+## How it looks in the database
+
+![BLOB Value](/articles/blob-value.png)
+
+## Retrieving the image from the BLOB
+
+![Image from database by BLOB](/articles/blob-example.png)
+
+---
+
+# What is a BLOB?
+
+A **[BLOB](https://en.wikipedia.org/wiki/Binary_large_object)** (Binary Large Object) is a database type made to store binary data.
+
+Instead of saving text like `VARCHAR`, a BLOB stores raw bytes, so it's perfect for things like:
+
+- Images
+- PDFs
+- Audio
+- Videos
+- Machine learning models
+
+---
+
+# What is a Database?
+
+A **[Database](https://en.wikipedia.org/wiki/Database)** is where your application stores and organizes data.
+
+Besides text and numbers, databases like **[Oracle Database](https://www.oracle.com/database/)** can also store binary files using the `BLOB` type.
+
+---
+
+# Why store images as BLOBs?
+
+There isn't a single correct solution, but storing images as BLOBs has some nice advantages:
+
+- The image stays attached to its database record
+- Backups become simpler
+- You don't need to manage file paths
+- Access control is handled by the database
+- Everything lives in one place
+
+---
+
+# BLOB Generation Pipeline
+
+Let's see how the image becomes a BLOB.
+
+## 1. Capture the frame
+
+First, the webcam captures a frame using **[OpenCV](https://opencv.org/)**.
+
+---
+
+## 2. Detect the face
+
+Then **[MediaPipe](https://ai.google.dev/edge/mediapipe)** detects the face and returns a bounding box.
+
+```text
+bbox
+
+origin_x
+origin_y
+width
+height
+```
+
+---
+
+## 3. Expand the bounding box
+
+Instead of cropping the exact face, I add a small margin.
+
+```python
+pad_w = int(w * margin)
+pad_h = int(h * margin)
+```
+
+This generates the final coordinates:
+
+```text
+x1
+y1
+x2
+y2
+```
+
+That extra space usually gives a better crop.
+
+---
+
+## 4. Crop the face
+
+Now it's time to crop the image.
+
+```python
+face_crop = img[y1:y2, x1:x2]
+```
+
+At this point it's still just an OpenCV (`numpy.ndarray`) image.
+
+---
+
+## 5. Encode as JPEG
+
+Next, the image is compressed into JPEG.
+
+```python
+_, buffer = cv2.imencode(".jpg", face_crop)
+```
+
+---
+
+## 6. Convert to bytes
+
+Finally, the JPEG buffer is converted into bytes.
+
+```python
+face_bytes = buffer.tobytes()
+```
+
+These bytes are exactly what we'll store inside the database.
+
+---
+
+# Inserting into the database
+
+The **[python-oracledb](https://python-oracledb.readthedocs.io/)** driver accepts Python `bytes` directly.
+
+```python
+cursor.execute(
+    """
+    INSERT INTO PERSON_FACES
+    (employee_id, face_image)
+    VALUES (:1, :2)
+    """,
+    (employee_id, face_bytes)
+)
+```
+
+The column is simply defined as:
+
+```sql
+face_image BLOB
+```
+
+The Oracle driver takes care of storing the bytes as a BLOB.
+
+---
+
+And that's basically it. The image goes from an OpenCV frame, to a JPEG, then to raw bytes, and finally into the database as a BLOB.
