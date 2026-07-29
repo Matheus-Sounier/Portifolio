@@ -19,14 +19,14 @@ export default function Home() {
   const daysSince = daysSinceLastPost()
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-8 font-mono text-zinc-300">
+    <main className="max-w-2xl mx-auto px-6 py-8 font-mono text-zinc-700 dark:text-zinc-300">
 
       <div className="flex gap-12">
 
         <div>
-          <h1 className="text-4xl font-bold text-zinc-100">Matheus Sounier</h1>
+          <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">Matheus Sounier</h1>
           <p className="text-sm text-zinc-500 mt-2">backend developer · Manaus, Brasil</p>
-          <p className="text-sm leading-relaxed mt-4 text-zinc-400">
+          <p className="text-sm leading-relaxed mt-4 text-zinc-600 dark:text-zinc-400">
             I'm an 18-year-old Software Engineering student passionate about Industry 4.0 technologies,
             including industrial software, IoT, Computer Vision, and LLM-powered systems. 
             I enjoy designing solutions that integrate ERPs, connected devices, 
@@ -47,7 +47,7 @@ export default function Home() {
               href="https://github.com/Matheus-Sounier"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-red-400 transition-colors duration-150"
+              className="hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +68,7 @@ export default function Home() {
 
             <a
               href="mailto:matheus.sounier2024@gmail.com"
-              className="hover:text-red-400 transition-colors duration-150"
+              className="hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +92,7 @@ export default function Home() {
               href="https://www.linkedin.com/in/matheus-dos-santos-sounier"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-red-400 transition-colors duration-150"
+              className="hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +119,7 @@ export default function Home() {
               href="https://wa.me/5592985469050"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-red-400 transition-colors duration-150"
+              className="hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -155,14 +155,14 @@ export default function Home() {
             <div key={w.slug} className="py-3">
               <Link
                 href={`/works/${w.slug}`}
-                className="font-semibold hover:text-red-400 transition-colors duration-150"
+                className="font-semibold hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
               >
                 {w.company}
 
                 <p className="text-xs text-zinc-500">
                   {w.role} · {formatPeriod(w.startDate, w.endDate)}
                 </p>
-                <p className="text-sm text-zinc-400 mt-1">{w.summary}</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{w.summary}</p>
               </Link>
             </div>
           </div>
@@ -176,14 +176,14 @@ export default function Home() {
         ))}
       </Section>
 
-      <footer className="border-t border-zinc-800 text-sm w-full mt-auto">
+      <footer className="border-t border-zinc-200 dark:border-zinc-800 text-sm w-full mt-auto">
         <div className="flex flex-col items-center justify-between py-6 sm:flex-row-reverse sm:py-4">
           <div className="flex-wrap justify-center gap-1 flex">
             <a
               href="https://github.com/Matheus-Sounier"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-red-400 transition-colors duration-150"
+              className="hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +204,7 @@ export default function Home() {
 
             <a
               href="mailto:matheus.sounier2024@gmail.com"
-              className="hover:text-red-400 transition-colors duration-150"
+              className="hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -228,7 +228,7 @@ export default function Home() {
               href="https://www.linkedin.com/in/matheus-dos-santos-sounier"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-red-400 transition-colors duration-150"
+              className="hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -255,7 +255,7 @@ export default function Home() {
               href="https://wa.me/5592985469050"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-red-400 transition-colors duration-150"
+              className="hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -288,15 +288,15 @@ export default function Home() {
 function Section({ title, allHref, allLabel, children }) {
   return (
     <section className="mt-10">
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-        <h1 className="text-1x1 text-zinc-100">
-          <span className="text-red-400">*</span> {title}
+      <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-2">
+        <h1 className="text-1x1 text-zinc-900 dark:text-zinc-100">
+          <span className="text-red-500 dark:text-red-400">*</span> {title}
         </h1>
-        <Link href={allHref} className="text-xs text-red-400 hover:underline">
+        <Link href={allHref} className="text-xs text-red-500 dark:text-red-400 hover:underline">
           {allLabel} ↗
         </Link>
       </div>
-      <div className="divide-y divide-zinc-900">{children}</div>
+      <div className="divide-y divide-zinc-200 dark:divide-zinc-900">{children}</div>
     </section>
   )
 }
