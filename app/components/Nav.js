@@ -83,7 +83,7 @@ export function Nav({ searchIndex = [] }) {
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
-  }, [])
+  }, [menuOpen])
 
   function close() {
     setOpen(false)
@@ -138,38 +138,44 @@ export function Nav({ searchIndex = [] }) {
 
   return (
     <>
-      <nav ref={navRef} className="flex items-center gap-4 text-sm font-mono">
-        <div className="hidden md:flex items-center gap-4">
-          {LINKS.map(renderLink)}
-        </div>
+      <div ref={navRef}>
+        <nav className="flex items-center gap-4 text-sm font-mono">
+          <div className="hidden md:flex items-center gap-4">
+            {LINKS.map(renderLink)}
+          </div>
 
-        <div className="ml-auto flex items-center gap-4">
-          <ThemeToggle />
+          <div className="ml-auto flex items-center gap-4">
+            <ThemeToggle />
 
-          <button
-            onClick={() => setOpen(true)}
-            className="text-rose-600 hover:text-rose-500 dark:text-rose-500 dark:hover:text-rose-400 transition-colors duration-150"
-            aria-label="search"
-          >
-            /
-          </button>
+            <button
+              onClick={() => {
+                setOpen((o) => !o)
+              }}
+              className="text-rose-600 hover:text-rose-500 dark:text-rose-500 dark:hover:text-rose-400 transition-colors duration-150"
+              aria-label="search"
+            >
+              /
+            </button>
 
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="md:hidden text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors duration-150"
-            aria-label="toggle menu"
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-      </nav>
+            <button
+              onClick={() => {
+                setMenuOpen((v) => !v)
+              }}
+              className="md:hidden text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors duration-150"
+              aria-label="toggle menu"
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </nav>
 
-      {menuOpen && (
-        <div className="md:hidden flex flex-col gap-3 pt-4 mt-4 border-t border-zinc-200 dark:border-zinc-900 text-sm font-mono">
-          {LINKS.map(renderLink)}
-        </div>
-      )}
+        {menuOpen && (
+          <div className="md:hidden flex flex-col gap-3 pt-4 mt-4 border-t border-zinc-200 dark:border-zinc-900 text-sm font-mono">
+            {LINKS.map(renderLink)}
+          </div>
+        )}
+      </div>
 
       {open && (
         <div

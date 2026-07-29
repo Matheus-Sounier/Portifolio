@@ -5,7 +5,7 @@ export default function ArticlesPage() {
   const articles = getAllArticles().sort((a, b) => new Date(b.date) - new Date(a.date))
 
   return (
-    <main className="max-w-2xl mx-auto py-8 px-6">
+    <main className="w-full max-w-3xl mx-auto py-8 px-6">
       <h1 className="text-1xl text-zinc-900 dark:text-zinc-100 mb-4 ">
         <span className="text-red-500 dark:text-red-400">*</span> Articles
       </h1>
