@@ -6,10 +6,10 @@ export default function ProjectsPage() {
 
   return (
     <main className="max-w-2xl mx-auto py-8 px-6">
-      <h1 className="text-1x1 text-zinc-100 mb-4">
-        <span className="text-red-400">*</span> Projects
+      <h1 className="text-1x1 text-zinc-900 dark:text-zinc-100 mb-4">
+        <span className="text-red-500 dark:text-red-400">*</span> Projects
       </h1>
-      <div className="divide-y divide-zinc-900">
+      <div className="divide-y divide-zinc-200 dark:divide-zinc-900">
         {projects.map((project) => (
           <ProjectCard key={project.slug} project={project} />
         ))}

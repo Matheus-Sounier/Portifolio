@@ -21,12 +21,12 @@ export default async function WorkPage({ params }) {
 
   return (
     <main className="max-w-2xl mx-auto py-8 px-6 font-mono">
-      <Link href="/works" className="text-xs text-red-400 hover:underline">
+      <Link href="/works" className="text-xs text-red-500 dark:text-red-400 hover:underline">
         ← all works
       </Link>
 
       <article className="mt-6">
-        <h1 className="text-2xl font-bold text-zinc-100">{frontmatter.company}</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{frontmatter.company}</h1>
         {frontmatter.startDate && (
           <p className="text-xs text-zinc-500 mt-1">
             {new Date(frontmatter.startDate).toLocaleDateString('en-US', {
@@ -37,7 +37,7 @@ export default async function WorkPage({ params }) {
           </p>
         )}
 
-        <div className="mt-6 prose prose-invert prose-zinc prose-sm max-w-none">
+        <div className="mt-6 prose dark:prose-invert prose-zinc prose-sm max-w-none">
           <MDXRemote
             source={content}
             options={mdxOptions}
@@ -45,7 +45,7 @@ export default async function WorkPage({ params }) {
               a: (props) => (
                 <a
                   {...props}
-                  className="text-xs text-red-400 hover:underline"
+                  className="text-xs text-red-500 dark:text-red-400 hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 />
