@@ -7,14 +7,14 @@ export default function NotFound() {
   const pathname = usePathname()
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-8 font-mono text-sm text-zinc-600 dark:text-zinc-300">
-
-      <p className="text-zinc-400 dark:text-zinc-500">
-        matheus@portfolio:~$
+    <main className="w-full max-w-3xl mx-auto px-6 py-8 font-mono text-sm text-zinc-600 dark:text-zinc-300">
+      <p className="mt-6">
+        <span className="text-zinc-400 dark:text-zinc-500">visitor@portfolio:~</span>
+        <span className="text-red-500 dark:text-red-400">$</span> curl https://matheussounier.vercel.app{pathname}
       </p>
 
-      <p className="mt-6">
-        <span className="text-red-500 dark:text-red-400">$</span> curl https://matheussounier.vercel.app{pathname}
+      <p className="mt-2 text-zinc-500 dark:text-zinc-400">
+        curl: (22) The requested URL returned error: 404
       </p>
 
       <div className="mt-6 space-y-1">
@@ -39,19 +39,29 @@ export default function NotFound() {
       </div>
 
       <p className="mt-10">
+        <span className="text-zinc-400 dark:text-zinc-500">visitor@portfolio:~</span>
         <span className="text-red-500 dark:text-red-400">$</span> ls
       </p>
 
       <div className="mt-2 space-y-1 text-zinc-500 dark:text-zinc-400">
         <p>/</p>
-        <p>articles/</p>
-        <p>projects/</p>
-        <p>works/</p>
-        <p>resume.pdf</p>
-        
+        <p>/articles</p>
+        <p>/projects</p>
+        <p>/works</p>
+        <p>/resume.pdf</p>
+
       </div>
 
+      <p className="mt-4 text-zinc-500 dark:text-zinc-400">
+        <span className="text-zinc-400 dark:text-zinc-600"># huge hint:</span> try{' '}
+        <Link href="/articles" className="text-red-500 dark:text-red-400 hover:underline">/articles</Link>,{' '}
+        <Link href="/projects" className="text-red-500 dark:text-red-400 hover:underline">/projects</Link>{' '}
+        or{' '}
+        <Link href="/works" className="text-red-500 dark:text-red-400 hover:underline">/works</Link>
+      </p>
+
       <p className="mt-8">
+        <span className="text-zinc-400 dark:text-zinc-500">visitor@portfolio:~</span>
         <span className="text-red-500 dark:text-red-400">$</span> ls{' '}
         {pathname.replace(/^\/+/, '') || 'missing-page'}
       </p>
@@ -61,14 +71,16 @@ export default function NotFound() {
       </p>
 
       <p className="mt-10">
-        <span className="text-red-500 dark:text-red-400">$</span>{' '}
-        <Link
-          href="/"
-          className="hover:text-red-500 dark:hover:text-red-400 transition-colors"
-        >
-          cd ~
-        </Link>
-        <span className="ml-1 inline-block w-[2px] h-4 bg-zinc-700 dark:bg-zinc-300 animate-pulse align-middle" />
+        <span className="text-zinc-400 dark:text-zinc-500">visitor@portfolio:~</span>
+        <span className="text-red-500 dark:text-red-400">$</span> cat what-to-do.txt
+      </p>
+
+      <p className="mt-2 text-zinc-500 dark:text-zinc-400">
+        Looks like this page doesn't exist.
+      </p>
+
+      <p className="mt-2 text-zinc-500 dark:text-zinc-400">
+        Try visiting one of the available directories showed above
       </p>
 
     </main>

@@ -20,7 +20,7 @@ export default async function WorkPage({ params }) {
   const { frontmatter, content } = getWorkBySlug(slug)
 
   return (
-    <main className="max-w-2xl mx-auto py-8 px-6 font-mono">
+    <main className="w-full max-w-3xl mx-auto py-8 px-6 font-mono">
       <Link href="/works" className="text-xs text-red-500 dark:text-red-400 hover:underline">
         ← all works
       </Link>

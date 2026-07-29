@@ -19,9 +19,9 @@ export default function Home() {
   const daysSince = daysSinceLastPost()
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-8 font-mono text-zinc-700 dark:text-zinc-300">
+    <main className="w-full max-w-3xl mx-auto px-6 py-8 font-mono text-zinc-700 dark:text-zinc-300">
 
-      <div className="flex gap-12">
+      <div className="flex flex-col-reverse sm:flex-row gap-8 sm:gap-12">
 
         <div>
           <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">Matheus Sounier</h1>
@@ -178,7 +178,7 @@ export default function Home() {
 
       <footer className="border-t border-zinc-200 dark:border-zinc-800 text-sm w-full mt-auto">
         <div className="flex flex-col items-center justify-between py-6 sm:flex-row-reverse sm:py-4">
-          <div className="flex-wrap justify-center gap-1 flex">
+          <div className="flex-wrap justify-center gap-3 flex">
             <a
               href="https://github.com/Matheus-Sounier"
               target="_blank"
