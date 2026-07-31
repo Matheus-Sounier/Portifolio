@@ -1,79 +1,82 @@
 ---
-title: "Kraken Docs"
-date: 2025-12-15
+title: "How PID Keeps the Robot on the Line"
+date: 2026-01-22
 ---
 
-## Overview
+When I first started building my line follower, I thought the hard part would be making the robot detect the line. It turned out that reading the sensors was actually the easy part.
 
-Kraken is a modular line follower robot built with [PlatformIO](https://platformio.org/). It uses an infrared sensor array to detect the line position and a PID controller to continuously adjust motor speeds, keeping the robot centered while predicting the correct direction at line intersections.
-
-The firmware is divided into four independent modules:
-
-- Sensors
-- PID Controller
-- Motor Control
-- Main Application
+The real challenge was keeping the robot centered while moving at a reasonable speed. That's where PID control made all the difference.
 
 ---
 
-## Hardware
+## From Sensors to Movement
 
-### Components
+Every loop starts by reading the infrared sensors. Based on which sensors detect the line, I calculate an error that tells the robot how far it is from the center.
 
-- [Arduino Uno R3](https://docs.arduino.cc/hardware/uno-rev3/)
-- [L298N Dual H-Bridge Driver](https://lastminuteengineers.com/l298n-dc-stepper-driver-arduino-tutorial/)
-- 2× 6V DC Motors
-- Infrared Sensor Array
-- 2× Wheels
-- 9V Power Supply
+For example:
 
----
+```text
+10000 → -2
+11000 → -1
+00100 →  0
+00011 → +2
+```
 
-## Pin Configuration
+A negative value means the robot is drifting to the left, while a positive value means it's moving to the right.
 
-### Sensors
-
-| Sensor | Pin |
-| :----: | :-: |
-| S1 | A0 |
-| S2 | A1 |
-| S3 | A2 |
-| S4 | A3 |
-| S5 | A4 |
-
-### Motor Driver (L298N)
-
-| Function | Pin |
-| :------: | :-: |
-| ENA | 5 |
-| ENB | 6 |
-| IN1 | 8 |
-| IN2 | 9 |
-| IN3 | 10 |
-| IN4 | 11 |
+This error becomes the input for the PID controller.
 
 ---
 
-## Architecture
+## The PID Formula
 
-### Sensors
+The controller itself is surprisingly simple.
 
-Responsible for:
+```cpp
+integral += error;
+derivative = error - previousError;
 
-- Reading the infrared sensors
-- Calculating the line position error
-- Detecting line loss
-- Providing input to the PID controller
+pid = (Kp * error)
+    + (Ki * integral)
+    + (Kd * derivative);
 
-### PID Controller
+previousError = error;
+```
 
-Responsible for:
+Each part has a different job.
 
-- Computing the proportional, integral, and derivative terms
-- Generating correction values
-- Adjusting left and right motor speeds
+- **Kp** reacts to the current error.
+- **Ki** compensates for accumulated error over time.
+- **Kd** predicts the movement and smooths the correction.
 
-Default parameters:
+Even though the formula is short, changing one parameter completely changes how the robot behaves.
+
+---
+
+## Turning the Robot
+
+The PID output isn't sent directly to the motors.
+
+Instead, I use it to adjust the speed of each wheel independently.
+
+```cpp
+leftSpeed  = baseSpeed + pid;
+rightSpeed = baseSpeed - pid;
+```
+
+If the robot starts drifting left, the controller speeds up one motor while slowing down the other. This differential steering naturally brings the robot back to the center of the line.
+
+---
+
+## Finding Good PID Values
+
+Writing the PID controller only took a few minutes.
+
+Finding values that actually worked took much longer.
+
+I started by adjusting only the proportional gain until the robot could roughly follow the line. After that, I introduced the derivative term to reduce oscillation during curves.
+
+These were the values that produced the best results on my robot.
 
 ```cpp
 Kp = 18.0;
@@ -83,80 +86,18 @@ Kd = 9.0;
 baseSpeed = 130;
 ```
 
-### Motor Control
-
-Responsible for:
-
-- Motor direction control
-- PWM speed control
-- Differential steering
-- Stop routines
+Notice that the integral gain remained at zero. During my tests, adding an integral component didn't improve the behavior, so I decided to keep the controller simpler.
 
 ---
 
-## PID Logic
+## Small Changes Make a Big Difference
 
-```text
-integral      = integral + error
-derivative    = error - previousError
-pid           = (Kp * error) + (Ki * integral) + (Kd * derivative)
-previousError = error
-```
+One thing I learned is that even tiny parameter changes can completely alter the robot's behavior.
 
-Motor output:
+A slightly higher proportional gain made it oscillate aggressively.
 
-```text
-leftSpeed  = dynamicBase + pid
-rightSpeed = dynamicBase - pid
-```
+Too much derivative made every correction feel delayed.
 
-This feedback loop enables smooth, real-time line tracking.
+Increasing the base speed without retuning the controller often caused the robot to overshoot corners and lose the line.
 
----
-
-## Technologies
-
-- [C++](https://en.cppreference.com/w/)
-- [PlatformIO](https://platformio.org/)
-- [Arduino Framework](https://docs.arduino.cc/)
-- [Visual Studio Code](https://code.visualstudio.com/)
-
----
-
-## Installation
-
-Clone the repository:
-
-```bash
-git clone git@github.com:Matheus-Sounier/Kraken_arduino.git
-```
-
-Enter the project directory:
-
-```bash
-cd Kraken_arduino
-```
-
-Open the project in **Visual Studio Code**. PlatformIO will automatically install the required toolchain and dependencies.
-
----
-
-## Build
-
-Compile the firmware:
-
-```bash
-pio run
-```
-
-or use **PlatformIO → Build**.
-
----
-
-## Upload
-
-Connect the Arduino Uno and upload the firmware:
-
-```bash
-pio run --target upload
-```
+PID tuning quickly became more of an experimental process than a programming task.

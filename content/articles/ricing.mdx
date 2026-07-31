@@ -1,6 +1,57 @@
 ---
-title: "ricing Debian distro"
-date: 2026-07-26
+title: "How I riced my Debian setup and changes of mind about linux"
+date: "2025-11-21"
 ---
 
-Recently a screenshot of my linux-debian config, etc
+## Pics
+
+![Rice 1](/articles/img/rice-1.png)
+
+Alright, let me tell a history. A lot of people who go through my OS ask: "why did you go mess with Linux like this?". Short answer: curiosity and a grudge against waste. Windows was eating almost **4 gigs of RAM just sitting there**, before I'd even opened a browser. So I installed [Debian](https://www.debian.org/) from scratch, no graphical installer, no desktop environment, just me, the terminal, and the decision to understand what every process on my system actually does.
+ 
+I picked Debian for the stable, low-magic base, where I'd have to configure everything by hand: the compositor, the bar, the terminal, the notification daemon. That kind of tedious work teaches you more than any course, because when something breaks, you're forced to understand why. I went with [Hyprland](https://wiki.hypr.land/) as my [Wayland](https://wayland.freedesktop.org/) compositor since it's lightweight and has great animation support without any desktop-environment bloat. The result: my system boots at around **800mb of RAM**, with [Waybar](https://github.com/Alexays/Waybar/wiki/Configuration), notifications, and an animated wallpaper already running, about 1/5 of what Windows used at idle.
+ 
+The part I enjoyed the most was Waybar, the top bar. It's not just "add a clock", you can build a full custom calendar with theme colors and formatted tooltips. Here's the clock module I use, with a Tokyo Night calendar on hover:
+ 
+```json
+"clock": {
+  "format": "{:%A, %B %d, %Y (%R)}",
+  "tooltip-format": "<tt><small>{calendar}</small></tt>",
+  "calendar": {
+    "mode": "year",
+    "format": {
+      "months": "<span color='#7aa2f7'><b>{}</b></span>",
+      "days": "<span color='#c0caf5'><b>{}</b></span>",
+      "weekdays": "<span color='#fcb167'><b>{}</b></span>",
+      "today": "<span color='#e92d4d'><b><u>{}</u></b></span>"
+    }
+  }
+}
+```
+ 
+Each part of the calendar gets its own color from the theme. Tweaking those hex values until it felt like part of the system, instead of a plugin dropped on top, was one of the most satisfying bits of the whole thing.
+ 
+Another nice touch nobody expects at first: the wallpaper switches on its own with a smooth transition. A bash script picks a random image from a folder and swaps it with a "grow" animation every 30 minutes:
+ 
+```bash
+set_wallpaper() {
+    IMG=$(head -n 1 "$CACHE")
+    awww img "$IMG" \
+        --transition-type "grow" \
+        --transition-duration 2 \
+        --transition-pos 0.925,0.977 \
+        --transition-bezier .43,1.19,1,.4 \
+        --transition-fps 60
+}
+ 
+while true; do
+    set_wallpaper
+    sleep 1800
+done
+```
+ 
+`transition-pos` sets where it "grows" from, and the custom bezier gives it that overshoot-and-settle feel instead of a flat linear fade.
+ 
+The upside isn't just looks and saved RAM, it taught me a ton about process management, [systemd](https://systemd.io/), Wayland vs [X11](https://www.x.org/wiki/), and how the "graphical environment" we use daily is really a bunch of independent programs talking to each other. That changed how I debug production issues too, since I now actually think about which process is eating what.
+ 
+It wasn't all smooth, though. Wayland still struggles with screen sharing and some X11-only apps. I had to learn about [Nerd Fonts](https://www.nerdfonts.com/) just to get icons showing up right in Waybar, how `hypridle` and `hyprlock` talk to lock the screen without wasting cycles, and how to debug Waybar not starting on boot. Ricing never really "ends", there's always a color to tweak or a module to try, and that's exactly why it teaches you so much.

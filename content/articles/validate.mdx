@@ -1,0 +1,137 @@
+---
+title: "How I Validate License Plate Formats"
+date: 2026-06-27
+---
+
+After detecting a license plate with YOLO and extracting its text using OCR, I still have one problem to solve.
+
+OCR isn't perfect.
+
+Sometimes it swaps `0` with `O`, `8` with `B`, or simply misses a character. Because of that, I didn't want to blindly trust whatever text the OCR returned. Before saving anything to the database, I decided to validate whether the detected text actually matches a real license plate format.
+
+---
+
+## The OCR Only Gives Me Text
+
+Once EasyOCR finishes reading the cropped plate, I receive something like this:
+
+```python
+plate_text = "R183JF"
+```
+
+At this point, I only have a string.
+
+The system still doesn't know whether this is a valid Mercosur plate, an older Brazilian plate, or simply random text produced by OCR.
+
+---
+
+## Using Regular Expressions
+
+The easiest way I found to solve this was using regular expressions.
+
+The current Brazilian Mercosur format follows this pattern:
+
+```text
+AAA1A23
+```
+
+while the older format is:
+
+```text
+AAA1234
+```
+
+So I created two regular expressions.
+
+```python
+import re
+
+mercosur_pattern = r"^[A-Z]{3}[0-9][A-Z][0-9]{2}$"
+old_pattern = r"^[A-Z]{3}[0-9]{4}$"
+```
+
+Then I simply compare the OCR result against both patterns.
+
+```python
+if re.match(mercosur_pattern, plate_text):
+    plate_type = "Mercosur"
+
+elif re.match(old_pattern, plate_text):
+    plate_type = "Legacy"
+
+else:
+    plate_type = "Unknown"
+```
+
+It's a surprisingly simple solution that removes many false detections.
+
+---
+
+## Cleaning the OCR Output
+
+OCR doesn't always return perfectly formatted text.
+
+Sometimes it includes spaces, lowercase letters or special characters.
+
+Before validating anything, I normalize the string.
+
+```python
+plate_text = (
+    plate_text
+    .replace(" ", "")
+    .replace("-", "")
+    .upper()
+)
+```
+
+That way, values like
+
+```text
+R-183-JF
+```
+
+become
+
+```text
+R183JF
+```
+
+making the validation much more reliable.
+
+---
+
+## Saving Everything in Oracle
+
+Once the format has been validated, I store both the recognized text and the cropped image inside Oracle.
+
+The table contains information such as:
+
+- Plate number
+- Validation status
+- Detection timestamp
+- Exit timestamp
+- Cropped plate image (BLOB)
+
+![Detected plates table](/articles/img/validate.jpeg)
+
+Having the image stored together with the detected text makes it much easier to verify whether the OCR made a mistake or if the plate was simply difficult to read because of lighting, motion blur or camera angle.
+
+---
+
+## Not Every Detection Is Valid
+
+One thing I learned while building this project is that detection and recognition are completely different problems.
+
+YOLO only tells me *where* the license plate is.
+
+OCR tries to tell me *what* is written on it.
+
+Even if YOLO detects the plate perfectly, the OCR can still fail because of:
+
+- Motion blur
+- Low resolution
+- Bad lighting
+- Dirt on the plate
+- Extreme viewing angles
+
+That's exactly why I validate the OCR result before considering it a real license plate.

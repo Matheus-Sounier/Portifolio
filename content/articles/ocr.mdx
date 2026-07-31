@@ -1,0 +1,84 @@
+---
+title: "Why I Detect the Plate Before Running OCR"
+date: 2026-05-18
+---
+
+At first I thought OCR could simply read a license plate directly from the original image. After all, the plate is already there, right?
+
+It turns out that doesn't work nearly as well as I expected.
+
+The biggest problem is that an OCR model isn't responsible for *finding* the plate. Its job is only to read text. If I feed it an entire image containing cars, roads, buildings, trees, shadows, and dozens of other objects, the OCR has to process a huge amount of irrelevant information before even reaching the license plate.
+
+Instead, I split the pipeline into two different tasks.
+
+---
+
+## The Detection Step
+
+The first model only has one responsibility: locate where the license plate is.
+
+![YOLO detecting the license plate](/articles/img/ocr.png)
+
+Using YOLO, I receive the bounding box coordinates around the detected plate.
+
+```python
+results = model(frame)
+
+for result in results:
+    for box in result.boxes:
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+        plate = frame[y1:y2, x1:x2]
+```
+
+Instead of sending the entire frame to the OCR engine, I simply crop the detected region.
+
+---
+
+## Why Cropping Helps
+
+After cropping, almost everything that could confuse the OCR disappears.
+
+Instead of processing thousands of pixels containing the whole vehicle and its surroundings, the OCR receives only the license plate.
+
+That usually leads to:
+
+- Better recognition accuracy.
+- Less visual noise.
+- Faster inference.
+- Fewer false detections.
+
+The OCR no longer has to "search" for text—it only has to read it.
+
+---
+
+## Separating Responsibilities
+
+I also like this approach because each model focuses on a single problem.
+
+- YOLO learns **where** the plate is.
+- OCR learns **what** is written on it.
+
+Keeping these responsibilities separate makes the pipeline much easier to improve later. If I train a better detector, I don't need to change the OCR. Likewise, if I replace the OCR engine, the detection stage stays exactly the same.
+
+---
+
+## The Complete Pipeline
+
+In the end, my pipeline looks something like this:
+
+```python
+results = detector(frame)
+
+for result in results:
+    for box in result.boxes:
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+        plate = frame[y1:y2, x1:x2]
+
+        text = reader.readtext(plate)
+```
+
+Each model solves a different problem, and together they produce much more reliable results than trying to run OCR directly on the original image.
+
+Sometimes adding one extra step actually makes the entire pipeline simpler.

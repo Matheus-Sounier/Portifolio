@@ -1,139 +1,113 @@
 ---
-title: "Real Time Motion Docs"
+title: "Building a Motion-Controlled Game with OpenCV"
 date: 2026-01-20
 ---
 
-A real-time motion-controlled system built with **C++**, **OpenCV**, and **CMake**.
+When I first thought about controlling a game with body movement, I immediately assumed I'd need some kind of AI model.
 
-The project allows players to control keyboard inputs using body movement detected through a webcam. Motion inside configurable regions automatically triggers the assigned keyboard keys.
-
----
-
-## Features
-
-- Real-time motion detection using a webcam
-- Configurable motion detection areas (ROIs)
-- Custom keyboard bindings
-- Persistent square configuration
-- Optional jump detection
-- Jump power measurement based on airtime
-- Motion-based directional controls
+After experimenting with OpenCV, I realized I didn't.
 
 ---
 
-## Technologies
+## Detecting Motion
 
-| Technology | Documentation |
-|------------|---------------|
-| C++ | [cppreference](https://en.cppreference.com/w/) |
-| CMake | [CMake Documentation](https://cmake.org/documentation/) |
-| OpenCV | [OpenCV Documentation](https://docs.opencv.org/4.x/) |
-| Visual Studio | [Visual Studio C++ Documentation](https://learn.microsoft.com/cpp/) |
-| Win32 API | [User Input Documentation](https://learn.microsoft.com/windows/win32/api/winuser/) |
+The core idea is simple.
 
----
+Every frame captured by the webcam is compared with the previous one. If enough pixels change inside a specific area, I consider that movement has occurred.
 
-## How It Works
+Instead of recognizing a person, the application only cares whether something moved.
 
-The application captures webcam frames with **OpenCV** and compares consecutive frames to detect movement inside predefined **Regions of Interest (ROIs)**.
+![Motion Detection](/articles/img/right.png)
 
-When movement exceeds a configurable threshold, the corresponding keyboard input is automatically triggered.
+![Motion Detection](/articles/img/left.png)
+
+To reduce noise, each frame goes through a few preprocessing steps before the comparison.
 
 ---
 
-### Detection Squares
+## Creating Detection Areas
 
-Each ROI acts as an independent motion sensor that can be positioned anywhere on the camera feed.
+One decision I made early on was avoiding hardcoded controls.
 
-```text
-Motion Detected
-      ↓
-ROI Activated
-      ↓
-Keyboard Key Pressed
+Instead, I created configurable regions of interest (ROIs) that can be placed anywhere on the camera feed.
+
+For example:
+
+- Left square → `A`
+- Right square → `D`
+- Upper square → `Space`
+
+Whenever movement exceeds the configured threshold inside one of these regions, the corresponding key is pressed automatically.
+
+---
+
+## Triggering Keyboard Inputs
+
+After detecting movement, the application simply simulates keyboard events.
+
+The implementation is surprisingly small.
+
+```cpp
+if (motion > threshold)
+{
+    keybd_event(key, 0, 0, 0);
+}
+else
+{
+    keybd_event(key, 0, KEYEVENTF_KEYUP, 0);
+}
 ```
 
----
+The challenge wasn't pressing keys.
 
-### Jump Detection
-
-When enabled, the system monitors movement above a configurable horizontal line. Crossing the line starts airtime measurement, which can be used to determine jump strength or trigger different in-game actions.
-
-```text
-Player Crosses Line
-        ↓
-Jump Starts
-        ↓
-Airtime Measured
-        ↓
-Jump Ends
-```
+The difficult part was finding thresholds that felt responsive without constantly triggering false positives.
 
 ---
 
-## Detection Method
+## Saving the Configuration
 
-Motion detection is based on **frame differencing**:
+Recreating every detection square after restarting the application quickly became frustrating.
 
-1. Capture consecutive frames.
-2. Convert to grayscale.
-3. Compute the absolute difference.
-4. Apply a threshold.
-5. Measure motion inside each ROI.
-6. Trigger keyboard events when the threshold is exceeded.
+To solve that, I added a configuration file that stores each ROI together with its keyboard binding.
 
-This lightweight approach is well suited for real-time applications.
+The next time the application starts, everything is restored automatically.
+
+That made experimenting with different layouts much more practical.
 
 ---
 
-## Requirements
+## Measuring a Jump
 
-Install:
+Simple movement detection worked well for directional controls, but jumping required a different approach.
 
-- **Visual Studio** (Desktop Development with C++)
-- **CMake**
-- **OpenCV**
+Instead of looking inside a square, I placed a horizontal line on the screen.
 
-Ensure both **CMake** and **OpenCV** are correctly configured in your system environment.
+Whenever the player crossed that line, the application started measuring how long they stayed above it.
 
----
+![Jump Detection](/articles/img/jump-line.png)
 
-## Installation
-
-```bash
-git clone git@github.com:Matheus-Sounier/Real-Time-Motion.git
-cd Real-Time-Motion
-
-cmake -B build
-cmake --build build
-```
+The measured airtime could then be used to estimate jump strength or trigger different actions depending on how long the player remained in the air.
 
 ---
 
-## Running
+## Why I Chose OpenCV
 
-After building, the executable will be generated inside the `build` directory.
+OpenCV already provides everything needed for this kind of project.
 
-Example:
+There was no need for object detection, pose estimation, or deep learning models.
 
-```text
-D:\Projects\YourProjectDirectory\build\Debug\JumpKingIRL.exe
-```
+Using basic image processing techniques kept the application lightweight while still being responsive enough for real-time interaction.
+
+For this use case, simplicity turned out to be the better solution.
 
 ---
 
-## Initial Configuration
+## What Took the Most Time
 
-```text
-CREATE A SQUARE
-- Double-click with the left mouse button.
+Writing the motion detection algorithm wasn't actually the hardest part.
 
-BIND A KEY
-- Select a square and press any key.
+Most of the development time went into tuning thresholds, reducing camera noise, and making the controls feel natural.
 
-MOVE A SQUARE
-- Select a square and use the arrow keys.
+Small changes in lighting, webcam position, or room conditions could completely change the behavior of the system.
 
-REMOVE A SQUARE
-- Select a square and right-click.
-```
+Making those adjustments taught me that building a real-time computer vision application often involves much more experimentation than writing complex algorithms.

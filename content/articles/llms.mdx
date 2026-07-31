@@ -1,6 +1,135 @@
 ---
-title: "How I implemented LLMs to computer vision projects"
-date: 2026-07-26
+title: "Understanding How LLMs Can Improve Computer Vision Projects"
+date: 2026-06-15
 ---
 
-In this project I used LLM to analyze images, etc.
+Computer Vision has become incredibly good at detecting faces, objects and people inside images. Models like [YOLO](https://docs.ultralytics.com/), [MediaPipe](https://ai.google.dev/edge/mediapipe/solutions/guide) or [InsightFace](https://github.com/deepinsight/insightface) can tell **where** something is and, in many cases, even **who** it is.
+
+But there is one thing these models don't naturally understand: language.
+
+Imagine your facial recognition system detects someone who isn't registered. It can store the photo, the timestamp and even the face embedding, but none of that immediately tells a human what actually happened.
+
+---
+
+## What Exactly Is an LLM?
+
+An LLM is an artificial intelligence model trained on massive amounts of text to understand and generate natural language.
+
+Unlike computer vision models, an LLM doesn't specialize in detecting faces or recognizing people. Instead, it excels at interpreting information and communicating it in a way that's easy for humans to read.
+
+You can think of it as the reasoning layer of your application.
+
+Your computer vision model detects **what exists**.
+
+The LLM explains **what that means**.
+
+If you'd like to learn more about how LLMs work, the [OpenAI documentation](https://platform.openai.com/docs/introduction) provides a great starting point.
+
+---
+
+## Where Computer Vision Meets Language
+
+This combination opens the door to a lot of interesting applications.
+
+In my facial recognition project, [MediaPipe](https://ai.google.dev/edge/mediapipe/solutions/guide) detects the face while [InsightFace](https://github.com/deepinsight/insightface) generates the facial embedding used during recognition.
+
+If the system doesn't find a matching person, instead of simply storing **"Unknown Person"**, it sends the captured image to a multimodal LLM through the [OpenRouter API](https://openrouter.ai/docs/api-reference/overview).
+
+The model analyzes the image and returns a neutral physical description, such as:
+
+> *Person wearing a black hoodie, blue jeans and glasses.*
+
+<video
+  src="/articles/videos/face-description.mp4"
+  controls
+  className="rounded-xl"
+/>
+
+---
+
+## Integrating an LLM Is Simpler Than It Looks
+
+Once the image has been captured, it can be converted into [Base64](https://developer.mozilla.org/en-US/docs/Glossary/Base64) and sent directly to a multimodal model.
+
+The request is surprisingly straightforward:
+
+```python
+response = client.post(
+    "https://openrouter.ai/api/v1/chat/completions",
+    json={
+        "model": "google/gemini-2.5-flash",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Describe only the person's appearance."
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image_base64}"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+)
+
+description = response.json()["choices"][0]["message"]["content"]
+```
+
+The computer vision pipeline still performs all the heavy lifting, including face detection, alignment and recognition.
+
+The LLM simply receives the final image and converts visual information into a human-readable description.
+
+---
+
+## LLMs Can Also Understand Your Database
+
+Descriptions aren't the only place where language models can help.
+
+After implementing facial recognition, I wanted an easier way to explore all the access logs stored in the database. Writing SQL queries every time quickly became repetitive, so I integrated another LLM—this time as a Text-to-SQL assistant.
+
+Instead of manually writing SQL, I can simply ask questions like:
+
+> *Who entered after 6 PM today?*
+
+or
+
+> *Show all failed access attempts this week.*
+
+A simplified version looks like this:
+
+```python
+question = "Show everyone who entered today."
+
+response = client.chat.completions.create(
+    model="openai/gpt-4.1",
+    messages=[
+        {
+            "role": "system",
+            "content": "You generate SQL queries."
+        },
+        {
+            "role": "user",
+            "content": question
+        }
+    ]
+)
+
+sql = response.choices[0].message.content
+result = database.execute(sql)
+```
+
+Instead of searching through tables or remembering SQL syntax, users can simply ask questions as if they were chatting with the system.
+
+If you're interested in learning more about SQL generation with language models, both the [OpenAI API documentation](https://platform.openai.com/docs/overview) and the [OpenRouter documentation](https://openrouter.ai/docs) explain how to integrate chat models into your own applications.
+
+<video
+  src="/articles/videos/text-to-sql.mp4"
+  controls
+  className="rounded-xl"
+/>
