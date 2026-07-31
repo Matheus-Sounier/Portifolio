@@ -3,6 +3,7 @@ import "./globals.css";
 import { Nav } from '@/app/components/Nav'
 import { ThemeScript } from '@/app/components/ThemeScript'
 import { getSearchIndex } from '@/lib/search'
+import { Footer } from '@/app/components/Footer'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,12 +33,13 @@ export default function RootLayout({ children }) {
         <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col bg-white dark:bg-zinc-950 transition-colors duration-150">
-        <header className="sticky top-0 z-20 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-150">
+        <header className="sticky top-0 z-20 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-150">
           <div className="max-w-3xl mx-auto w-full px-6 py-5">
             <Nav searchIndex={searchIndex} />
           </div>
         </header>
         {children}
+        <Footer />
       </body>
     </html>
   );
