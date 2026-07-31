@@ -69,8 +69,6 @@ This means the application only sends one embedding to the database, and Oracle 
 
 ---
 
-## Why This Approach Works So Well
-
-One thing I really like about this approach is that the application becomes much simpler. The recognition model only needs to generate an embedding, while Oracle is responsible for storing vectors and searching through them efficiently.
+The recognition model only needs to generate an embedding, while Oracle is responsible for storing vectors and searching through them efficiently.
 
 Instead of asking *"Which image looks the most similar?"*, the database asks *"Which vector is mathematically closest?"* That's exactly why modern facial recognition systems don't compare photos—they compare embeddings. Once those embeddings are stored as native Oracle vectors, recognition becomes nothing more than a fast vector similarity search.
