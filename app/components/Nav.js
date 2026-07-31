@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/app/components/ThemeToggle'
 
@@ -27,8 +28,13 @@ export function Nav({ searchIndex = [] }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [navHeight, setNavHeight] = useState(0)
+  const [mounted, setMounted] = useState(false)
   const inputRef = useRef(null)
   const navRef = useRef(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -77,13 +83,18 @@ export function Nav({ searchIndex = [] }) {
   useEffect(() => {
     function measure() {
       if (navRef.current) {
-        setNavHeight(navRef.current.getBoundingClientRect().bottom)
+        const header = navRef.current.closest('header')
+        if (header) {
+          setNavHeight(header.getBoundingClientRect().bottom)
+        } else {
+          setNavHeight(navRef.current.getBoundingClientRect().bottom)
+        }
       }
     }
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
-  }, [menuOpen])
+  }, [menuOpen, open, mounted])
 
   function close() {
     setOpen(false)
@@ -177,9 +188,9 @@ export function Nav({ searchIndex = [] }) {
         )}
       </div>
 
-      {open && (
+      {open && mounted && createPortal(
         <div
-          className="fixed left-0 right-0 bottom-0 bg-white dark:bg-zinc-950 overflow-y-auto"
+          className="fixed left-0 right-0 bottom-0 bg-white dark:bg-zinc-950 overflow-y-auto z-30"
           style={{ top: navHeight }}
         >
           <div className="max-w-2xl mx-auto px-6 pt-10">
@@ -215,7 +226,8 @@ export function Nav({ searchIndex = [] }) {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
