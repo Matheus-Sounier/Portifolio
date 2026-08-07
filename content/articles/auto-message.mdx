@@ -1,0 +1,154 @@
+---
+title: "Emails and whatsapp message using SMTP, IMAP and Evolution API"
+date: 2026-08-07
+---
+
+In this project, I built an automation that helps me send job applications by both email and WhatsApp.
+
+Instead of manually repeating the same process for dozens of companies, I store all contacts in a CSV file and let the application handle the entire workflow automatically.
+
+---
+
+# Project Workflow
+
+This is the complete flow that I implemented:
+
+1. Read the companies from a CSV file.
+2. Send the application by email.
+3. Send the same application through WhatsApp
+4. Store the result in SQLite.
+5. Periodically check for email replies.
+6. Update the application status automatically.
+
+# Reading the Contact List
+
+I keep all company information inside a CSV file because it's simple to edit and doesn't require a database.
+
+Each row contains the company name, email address, and an optional WhatsApp number.
+
+Before using the phone number, I normalize it to the Brazilian format and automatically add the country code when necessary.
+
+```python
+email_dest = row["email"].strip()
+
+whatsapp_raw = (
+    row.get("whatsapp_opcional") or ""
+).strip()
+
+whatsapp_number = normalize_br_number(
+    whatsapp_raw
+)
+```
+
+![BLOB Value](/articles/img/csv.jpeg)
+
+# Sending Emails with SMTP
+
+To send emails, I use Python's `smtplib` together with `MIMEMultipart`.
+
+The message contains the email body and my resume as a PDF attachment.
+
+```python
+with smtplib.SMTP(
+    SMTP_SERVER,
+    SMTP_PORT
+) as server:
+
+    server.starttls()
+
+    server.login(
+        EMAIL_USER,
+        EMAIL_PASS
+    )
+
+    server.sendmail(
+        EMAIL_USER,
+        recipients,
+        msg.as_string()
+    )
+```
+
+The email logic is isolated inside `mailer/sender.py`, making it reusable throughout the project.
+
+![BLOB Value](/articles/img/email.jpeg)
+
+# Sending WhatsApp Messages
+
+Besides email, I also wanted to contact companies through WhatsApp.
+
+For this, I integrated the Evolution API using `httpx`.
+
+```python
+url = (
+    f"{EVOLUTION_API_URL}"
+    "/message/sendText/"
+    f"{EVOLUTION_INSTANCE}"
+)
+
+payload = {
+    "number": number,
+    "text": text,
+}
+
+httpx.post(
+    url,
+    headers=HEADERS,
+    json=payload,
+    timeout=30,
+)
+```
+
+This allows me to reuse the same application message across multiple companies.
+
+![BLOB Value](/articles/img/whatsapp.jpeg)
+
+# Sending My Resume
+
+After sending the text message, I also send my resume as a PDF.
+
+The document is converted to Base64 before being uploaded to the API.
+
+```python
+encoded = base64.b64encode(
+    f.read()
+).decode("utf-8")
+
+payload = {
+    "number": number,
+    "mediatype": "document",
+    "mimetype": "application/pdf",
+    "media": encoded,
+    "fileName": filename,
+    "caption": caption,
+}
+```
+
+Sending the resume separately makes it easier for recruiters to download and view the document.
+
+# Checking Email Replies
+
+Sending applications is only half of the process.
+
+I also wanted the system to monitor my inbox and automatically detect company replies.
+
+```python
+mail = imaplib.IMAP4_SSL(
+    IMAP_SERVER
+)
+
+mail.login(
+    EMAIL_USER,
+    EMAIL_PASS
+)
+
+mail.select("inbox")
+
+status, messages = mail.search(
+    None,
+    search_criterion
+)
+```
+
+Since email and WhatsApp are independent, a failure in one does not stop the other.
+
+This makes the workflow much more reliable while allowing me to inspect logs whenever something goes wrong.
