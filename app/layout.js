@@ -4,6 +4,8 @@ import { Nav } from '@/app/components/Nav'
 import { ThemeScript } from '@/app/components/ThemeScript'
 import { getSearchIndex } from '@/lib/search'
 import { Footer } from '@/app/components/Footer'
+import { Analytics } from '@vercel/analytics/react'
+import { GoogleAnalytics } from '@/app/components/GoogleAnalytics'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +42,8 @@ export default function RootLayout({ children }) {
         </header>
         {children}
         <Footer />
+        <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );
