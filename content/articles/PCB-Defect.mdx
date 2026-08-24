@@ -1,0 +1,174 @@
+---
+title: "How I Built a PCB Defect Detecting Heatmap, Mask, and Segmentation with YOLO"
+date: 2026-08-23
+---
+
+I want to walk you through a project I built to detect defects on printed circuit boards using YOLO. 
+What I really want to focus on is how I took the raw model output and turned it into three visualizations: 
+a heatmap, a binary mask, and an annotated segmentation image.
+
+---
+
+## 1. Result example
+
+<img src='/articles/img/output-img.jpg' width="700" alt="output example image"/>
+
+In the Image column, the raw board with no annotation. In the Heat Map column, the hot points in red and yellow sit exactly where YOLO found spurious copper with higher confidence, one point noticeably more intense than the others. In the Mask column those same regions became clean white blobs from the 0.4 threshold. In the Segmentation column each detection got a red rectangle and a green spurious copper label, matching the JSON report.
+
+## 2. The problem I was trying to solve
+
+I had a PCB dataset from Roboflow, the pcb_defect-9cisw project, with six defect types:
+
+```yaml
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 6
+names: ['missing_hole', 'mouse_bite', 'open_circuit', 'short', 'spur', 'spurious_copper']
+```
+
+That is missing hole, mouse bite, open circuit, short, spur which is a leftover trace, and spurious copper, copper that stayed where it should not have. My goal was to run YOLO to find these defects, but beyond the standard bounding box, I wanted something richer.
+
+Every test image ends up as a four column panel: Image, Heat Map, Mask, and Segmentation. That panel is the example I will show at the end.
+
+---
+
+I store each detection as a plain tuple with x1, y1, x2, y2, and conf. I preferred extracting only what matters instead of keeping the ultralytics objects around. That way the next functions do not need to know anything about the YOLO library itself, they just receive numbers. If I ever swap the model for another version or another detector, I only need to adapt this first part.
+
+args.conf is the minimum confidence to accept a detection. My CLI default is 0.1, quite permissive, so subtle defects are not lost.
+
+I also read the class names YOLO assigned to each detection:
+
+```python
+def get_yolo_labels(results):
+    labels = []
+    names = getattr(results, "names", {}) or {}
+    for box in results.boxes:
+        if box.cls is None or len(box.cls) == 0:
+            labels.append("other")
+            continue
+        class_id = int(box.cls[0])
+        labels.append(names.get(class_id, "other"))
+    return labels
+```
+
+This returns one label per detection, in the same order as the boxes. If a class is missing, I fall back to a generic other label, so the pipeline never breaks over a missing label.
+
+---
+
+## 3. Generating the heatmap
+
+This is the part I enjoyed building the most. Instead of a hard rectangle around a defect, I wanted a heat map showing where the defect probability is concentrated, stronger at the center and fading toward the edges, like a gaussian.
+
+```python
+def generate_heatmap(image_shape, detections, sigma_scale=0.35):
+    h, w = image_shape[:2]
+    heatmap = np.zeros((h, w), dtype=np.float32)
+
+    for (x1, y1, x2, y2, conf) in detections:
+        cx, cy = int((x1 + x2) / 2), int((y1 + y2) / 2)
+        box_w, box_h = (x2 - x1), (y2 - y1)
+        sigma_x = max(box_w * sigma_scale, 5)
+        sigma_y = max(box_h * sigma_scale, 5)
+
+        y_grid, x_grid = np.ogrid[:h, :w]
+        gaussian = np.exp(
+            -(((x_grid - cx) ** 2) / (2 * sigma_x ** 2)
+              + ((y_grid - cy) ** 2) / (2 * sigma_y ** 2))
+        )
+        heatmap += gaussian * conf
+
+    if heatmap.max() > 0:
+        heatmap = heatmap / heatmap.max()
+    return heatmap
+```
+
+First I create a matrix of zeros the size of the image. That is the canvas. For each detection I find the center of the box, that is where the heat is strongest. The standard deviation is proportional to the box size, a large detection spreads a bigger blob, a small one produces a sharper point.
+
+np.ogrid builds the coordinate grids I use to measure the distance from every pixel to the detection center, following the 2D gaussian formula:
+
+gaussian(x, y) = exp( -( (x-cx)^2 / (2*sigma_x^2) + (y-cy)^2 / (2*sigma_y^2) ) )
+
+I multiply the gaussian by the confidence, so a 95 percent detection weighs more than a 20 percent one, and I accumulate every gaussian into the same heatmap, so nearby detections stack up and get hotter together. At the end I normalize between 0 and 1.
+
+Then I turn it into color:
+
+```python
+def heatmap_to_bgr(heatmap):
+    heatmap_uint8 = np.uint8(255 * heatmap)
+    return cv2.applyColorMap(heatmap_uint8, cv2.COLORMAP_JET)
+```
+
+I use OpenCV's JET colormap, blue to green to yellow to red. Blue means low attention, red means high attention.
+
+Finally I blend it with the original image so the board context is not lost:
+
+```python
+heatmap_overlay = cv2.addWeighted(image, 0.5, heatmap_bgr, 0.5, 0)
+```
+
+That 50-50 blend is exactly what shows up in the Heat Map column.
+
+---
+
+## 4. Generating the mask
+
+The mask is a binary decision on top of the heatmap, is this pixel a defect region or not.
+
+```python
+def generate_mask(heatmap, threshold=0.4):
+    return np.uint8(heatmap >= threshold) * 255
+```
+
+Every pixel at or above the threshold becomes white, the rest stays black. This threshold is configurable through the command line. A higher value, like 0.6, keeps only the hottest core of the defect. A lower value, like 0.2, covers a wider area around it.
+
+This mask, white blobs on a black background, appears in the Mask column and is useful because a binary mask is exactly the format that feeds later steps, like computing defect area or comparing frames over time.
+
+---
+
+## 5. Generating the segmentation
+
+This is the presentation step. I draw a rectangle, or a circle depending on the option, around each detection, plus a label with the defect name.
+
+```python
+def generate_segmentation(image, detections, labels=None, use_rectangle=True):
+    seg = image.copy()
+    labels = labels or [None] * len(detections)
+
+    def draw_label(i, base_x, base_y):
+        if not labels[i]:
+            return
+        text = str(labels[i]).replace("_", " ")
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        scale = 0.7
+        thickness = 2
+        (text_width, text_height), _ = cv2.getTextSize(text, font, scale, thickness)
+        x = max(10, min(seg.shape[1] - text_width - 12, int(base_x)))
+        y = max(text_height + 12, int(base_y) - 10)
+
+        cv2.rectangle(
+            seg,
+            (x - 8, y - text_height - 8),
+            (x + text_width + 8, y + 8),
+            (0, 255, 0),
+            -1,
+        )
+        cv2.putText(seg, text, (x, y), font, scale, (0, 0, 0), cv2.LINE_AA)
+
+    if use_rectangle:
+        for i, (x1, y1, x2, y2, conf) in enumerate(detections):
+            cv2.rectangle(seg, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 2)
+            cx = int((x1 + x2) / 2)
+            draw_label(i, int(cx) - 60, int(y1) - 10)
+    else:
+        for i, (x1, y1, x2, y2, conf) in enumerate(detections):
+            cx = int((x1 + x2) / 2)
+            cy = int((y1 + y2) / 2)
+            radius = max(int(max(x2 - x1, y2 - y1) / 2), 8)
+            cv2.circle(seg, (int(cx), int(cy)), radius + 5, (0, 0, 255), 2)
+            draw_label(i, int(cx) - 60, int(cy) - radius - 10)
+    return seg
+```
+
+I copy the image before drawing on it, so I do not damage the original used elsewhere in the panel. The draw_label function measures the text size first, so the green background box fits properly and never spills outside the image. I draw the filled green rectangle first, then write black text on top, that is the green label with black text you see reading spurious copper.
