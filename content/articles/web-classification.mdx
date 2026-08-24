@@ -1,0 +1,178 @@
+---
+title: "Combining Deterministic Rules and AI for Web Classification"
+date: 2026-08-17
+---
+
+When I started building my job application automation system, I thought about using AI to analyze every company website.
+
+But I quickly realized that **I didn't need AI for everything**.
+
+If a page contains words like `careers`, `jobs`, or `vacancies`, normal Python code can detect them.
+
+The difficult cases are pages where the meaning matters more than the exact words.
+
+That's where AI becomes useful.
+
+In this article, I'll show how I combine **deterministic rules and AI** to classify company websites.
+
+<img src="/articles/img/rules'n-semantic.png" width="500"/>
+
+---
+
+## The problem
+
+Suppose I have 100 company websites to analyze.
+
+I could send all of them to an LLM, but that would waste tokens.
+
+Many pages can be classified using simple rules:
+
+```python
+job_signals = [
+    "careers",
+    "jobs",
+    "vacancies",
+    "work with us",
+]
+
+page_text = page_text.lower()
+
+if any(signal in page_text for signal in job_signals):
+    print("Possible job opportunity found")
+else:
+    print("No clear job signal found")
+```
+
+So I split the process into two stages:
+
+1. Deterministic rules for obvious cases
+2. AI for uncertain cases
+
+## The pipeline
+
+The idea is simple:
+
+```text
+Website
+   ↓
+Extract text
+   ↓
+Deterministic rules
+   ↓
+Clear result?
+   ├── Yes → Result
+   └── No  → AI → Result
+```
+
+<img src="/content/articles/img+decision.png" width="500"/>
+
+### 1. Deterministic classification
+
+First, I extract the text from the website and look for common job-related signals.
+
+```python
+JOB_SIGNALS = [
+    "careers",
+    "career",
+    "jobs",
+    "vacancies",
+]
+
+def has_job_signal(text):
+    text = text.lower()
+    return any(
+        signal in text
+        for signal in JOB_SIGNALS
+    )
+```
+
+These words are only signals. Finding `careers` doesn't guarantee that the company currently has an open position.
+
+### 2. Why rules aren't enough
+
+Websites don't follow the same structure.
+
+One company might use:
+
+```text
+/careers
+```
+
+Another might use:
+
+```text
+/work-with-us
+```
+
+A rule-based system can miss these variations.
+
+This is where AI becomes useful.
+
+### 3. Using AI when necessary
+
+Instead of sending every page to an LLM, I only use it when the rules aren't enough.
+
+The LLM can understand that phrases such as:
+
+- "Join our team"
+- "We're hiring"
+- "Open positions"
+- "Build your career with us"
+
+can all indicate that a company is recruiting.
+
+## Structured results
+
+I can also ask the LLM for a structured response instead of a simple text answer:
+
+```json
+{
+  "has_job_opportunity": true,
+  "confidence": 0.91,
+  "reason": "The page indicates that the company is recruiting."
+}
+```
+
+Then Python remains responsible for the actual decision:
+
+```python
+if result["confidence"] >= 0.8:
+    if result["has_job_opportunity"]:
+        print("Job opportunity confirmed")
+    else:
+        print("No job opportunity found")
+else:
+    print("Result is uncertain")
+```
+
+This makes the system easier to control.
+
+## Why I don't send everything to an LLM
+
+The main reason is simple: tokens.
+
+Instead of:
+
+```text
+100 websites
+     ↓
+100 LLM requests
+```
+
+I can do:
+
+```text
+100 websites
+     ↓
+Rules
+     ↓
+Clear results
+     ↓
+Uncertain pages
+     ↓
+LLM
+```
+
+The exact numbers depend on the data, but the principle is the same:
+
+> Don't use an LLM for something that normal code can already solve.
