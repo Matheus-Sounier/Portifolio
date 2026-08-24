@@ -1,0 +1,67 @@
+---
+title: "Automating My Job Applications with Python, Discord and APIs"
+date: 2026-08-12
+---
+
+Applying for jobs can get repetitive really quickly.
+
+I have to find companies, check if they're hiring, look for an email or WhatsApp number, write a message, send my resume and keep track of the companies I've already contacted.
+
+So I decided to automate most of this process with Python.
+
+In this article I'll show how my application pipeline works using **Python, Discord, SQLite, SMTP, IMAP, Evolution API and Playwright**.
+
+---
+
+## Discord as the approval system
+
+After the company is analyzed, my Discord bot sends me the information.
+
+For example:
+
+<img src="/articles/img/discord.png" width="400" alt="discord message image"/>
+
+# The idea
+
+The main goal is simple: automate the repetitive parts while keeping myself responsible for the final decision.
+
+I don't want a program to automatically send hundreds of applications without me knowing where they're going.
+
+Instead, the system finds potential companies and sends them to me for approval through Discord.
+
+The basic flow is:
+
+```text
+Company discovery
+       ↓
+   Python
+       ↓
+    SQLite
+       ↓
+   Discord
+       ↓
+  I approve
+       ↓
+Email / WhatsApp / Form
+```
+
+## Finding companies
+
+I start with a list of companies that I want to contact.
+
+The program checks their websites and tries to determine whether they have an open position for the area I'm interested in.
+
+If it finds a relevant job, the system stores the information.
+
+If there isn't a clear job opening, I can still decide to contact the company using a generic message asking about opportunities.
+
+The important information is stored in SQLite, including things like:
+
+- Company
+- Job
+- URL
+- Email
+- WhatsApp
+- Status
+
+This also helps prevent duplicate applications.
