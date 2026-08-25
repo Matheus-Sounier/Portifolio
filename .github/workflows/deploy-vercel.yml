@@ -1,14 +1,8 @@
 name: Deploy to Vercel (optional)
-
-# This workflow is optional. It triggers when the CI workflow completes successfully
-# and will run a deploy to Vercel for the `main` branch. To use it, set the
-# repository secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
-
 on:
   workflow_run:
     workflows: ["CI"]
     types: [completed]
-
 jobs:
   vercel-deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
@@ -16,17 +10,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v21
+        uses: amondnet/vercel-action@v42
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
