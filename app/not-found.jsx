@@ -67,7 +67,7 @@ export default function NotFound() {
       </p>
 
       <p className="mt-2 text-zinc-400 dark:text-zinc-500">
-        ls: cannot access '{pathname.replace(/^\/+/, '') || 'missing-page'}': No such file or directory
+        ls: cannot access &apos;{pathname.replace(/^\/+/, '') || 'missing-page'}&apos;: No such file or directory
       </p>
 
       <p className="mt-10">
@@ -76,7 +76,7 @@ export default function NotFound() {
       </p>
 
       <p className="mt-2 text-zinc-500 dark:text-zinc-400">
-        Looks like this page doesn't exist.
+        Looks like this page doesn&apos;t exist.
       </p>
 
       <p className="mt-2 text-zinc-500 dark:text-zinc-400">

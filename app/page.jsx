@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getLatestArticles, daysSinceLastPost } from '@/lib/articles'
 import { getAllWork } from '@/lib/works'
 import { getAllProjects } from '@/lib/projects'
@@ -27,17 +28,20 @@ export default function Home() {
           <h1 className="text-2xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-100">Matheus Sounier</h1>
           <p className="text-sm sm:text-base text-zinc-500 mt-2">backend developer · Manaus, Brasil</p>
           <p className="text-sm sm:text-base leading-relaxed mt-4 text-zinc-600 dark:text-zinc-400">
-            I'm an 18-year-old Software Engineering student passionate about Industry 4.0 technologies,
+            I&apos;m an 18-year-old Software Engineering student passionate about Industry 4.0 technologies,
             including industrial software, IoT, Computer Vision, and LLM-powered systems.
             I enjoy designing solutions that integrate ERPs, connected devices,
             real-time vision to solve real industrial challenges.
           </p>
         </div>
         <div className="flex flex-col items-center shrink-0">
-          <img
+          <Image
             src="/avatar.png"
             alt="Matheus dos Santos Sounier"
+            width={200}
+            height={200}
             className="rounded-full object-cover shrink-0 w-36 h-36 sm:w-[200px] sm:h-[200px]"
+            priority
           />
         </div>
 

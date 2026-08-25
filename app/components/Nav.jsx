@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -33,7 +34,8 @@ export function Nav({ searchIndex = [] }) {
   const navRef = useRef(null)
 
   useEffect(() => {
-    setMounted(true)
+    const id = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(id)
   }, [])
 
   useEffect(() => {
@@ -75,9 +77,12 @@ export function Nav({ searchIndex = [] }) {
   }, [open])
 
   useEffect(() => {
-    setOpen(false)
-    setQuery('')
-    setMenuOpen(false)
+    const id = requestAnimationFrame(() => {
+      setOpen(false)
+      setQuery('')
+      setMenuOpen(false)
+    })
+    return () => cancelAnimationFrame(id)
   }, [pathname])
 
   useEffect(() => {

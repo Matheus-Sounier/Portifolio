@@ -6,13 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest",
+    "coverage": "vitest --coverage"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "^16.2.12",
     "@vercel/analytics": "^2.0.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "gray-matter": "^4.0.3",
     "lucide-react": "^1.27.0",
     "next": "16.2.12",
@@ -22,14 +25,22 @@
     "rehype-pretty-code": "^0.14.5",
     "remark-gfm": "^4.0.1",
     "shiki": "^4.3.1",
-    "simple-icons": "^16.27.1"
+    "simple-icons": "^16.27.1",
+    "test": "^3.3.0",
+    "vercel": "^59.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.20",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
-    "tailwindcss": "^4"
+    "jsdom": "^22.1.0",
+    "tailwindcss": "^4",
+    "typescript": "^5.9.3",
+    "vitest": "^1.0.0"
   }
 }
